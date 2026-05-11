@@ -4,6 +4,8 @@ This project demonstrates how AI-driven logic can be embedded into customer supp
 
 ## 🎥 Demo
 
+This application demonstrates AI-powered ticket classification, SLA calculation, and automated workflow routing in a simulated CX environment.
+
 
 ---
 
@@ -30,6 +32,14 @@ User submits ticket → AI classifies → system routes → dashboard updates �
 - HTML / CSS / JS
 - REST APIs
 - JSON storage
+
+---
+
+## ⚠️ Error Handling
+
+- Validates required fields
+- Handles missing tickets
+- Provides API error responses
 
 ---
 

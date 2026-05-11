@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Agent Dashboard — Support Operations</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f4f5f7; color: #172b4d; }
+
+    .header {
+      background: #0052cc; color: white; padding: 14px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .header h1 { font-size: 18px; font-weight: 600; }
+    .header span { font-size: 12px; opacity: 0.8; }
+
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 16px; padding: 20px 24px;
+    }
+    .stat-card {
+      background: white; border-radius: 6px; padding: 16px;
+      border-left: 4px solid #0052cc;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .stat-card.urgent { border-left-color: #de350b; }
+    .stat-card.breached { border-left-color: #ff8800; }
+    .stat-card.open { border-left-color: #00875a; }
+    .stat-number { font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+    .stat-label { font-size: 12px; color: #6b778c; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .main { display: grid; grid-template-columns: 1fr 380px; gap: 16px; padding: 0 24px 24px; }
+
+    .panel {
+      background: white; border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .panel-header {
+      padding: 14px 16px; border-bottom: 1px solid #ebecf0;
+      font-weight: 600; font-size: 14px; display: flex;
+      justify-content: space-between; align-items: center;
+    }
+    .panel-body { padding: 12px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 8px 10px; color: #6b778c;
+         font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #ebecf0; }
+    td { padding: 10px; border-bottom: 1px solid #f4f5f7; vertical-align: top; }
+    tr:hover td { background: #f4f5f7; }
+
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 3px;
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+    }
+    .badge-urgent   { background: #ffebe6; color: #bf2600; }
+    .badge-high     { background: #fff0b3; color: #974f0c; }
+    .badge-medium   { background: #e3fcef; color: #006644; }
+    .badge-low      { background: #f4f5f7; color: #6b778c; }
+    .badge-tech     { background: #e6f2ff; color: #0747a6; }
+    .badge-billing  { background: #fffae6; color: #7a6000; }
+    .badge-results  { background: #e3fcef; color: #006644; }
+    .badge-reg      { background: #eae6ff; color: #403294; }
+
+    .action-btn {
+      font-size: 11px; padding: 4px 10px; border: 1px solid #dfe1e6;
+      border-radius: 3px; background: white; cursor: pointer; margin-right: 4px;
+    }
+    .action-btn:hover { background: #f4f5f7; }
+    .action-btn.primary { background: #0052cc; color: white; border-color: #0052cc; }
+    .action-btn.primary:hover { background: #0065ff; }
+
+    .ai-panel { display: none; padding: 14px; border-top: 1px solid #ebecf0; background: #fafbff; }
+    .ai-panel.visible { display: block; }
+    .ai-label { font-size: 11px; font-weight: 600; color: #6b778c; text-transform: uppercase; margin-bottom: 6px; }
+    .ai-summary { font-size: 13px; line-height: 1.5; color: #172b4d; background: #e6f2ff; border-radius: 4px; padding: 10px; margin-bottom: 10px; }
+    .ai-response { font-size: 13px; line-height: 1.5; color: #172b4d; background: #e3fcef; border-radius: 4px; padding: 10px; white-space: pre-wrap; }
+    .ai-response-actions { margin-top: 8px; }
+
+    .sla-ok   { color: #00875a; font-size: 12px; }
+    .sla-warn { color: #ff8b00; font-size: 12px; }
+    .sla-breach { color: #de350b; font-size: 12px; font-weight: 600; }
+
+    .right-panel .panel-body { padding: 0; }
+    .log-item { padding: 10px 14px; border-bottom: 1px solid #f4f5f7; font-size: 12px; }
+    .log-item:last-child { border-bottom: none; }
+    .log-time { color: #6b778c; font-size: 11px; margin-bottom: 2px; }
+    .log-action { font-weight: 600; color: #172b4d; }
+    .log-detail { color: #6b778c; }
+
+    .refresh-btn {
+      font-size: 12px; padding: 6px 12px; background: #0052cc; color: white;
+      border: none; border-radius: 4px; cursor: pointer;
+    }
+    .refresh-btn:hover { background: #0065ff; }
+
+    .empty { text-align: center; padding: 40px; color: #6b778c; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎓 School Support — Agent Dashboard</h1>
+  <span id="last-refresh">Loading...</span>
+</div>
+
+<!-- Stats Row -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-number" id="stat-total">—</div>
+    <div class="stat-label">Total tickets</div>
+  </div>
+  <div class="stat-card open">
+    <div class="stat-number" id="stat-open">—</div>
+    <div class="stat-label">Open tickets</div>
+  </div>
+  <div class="stat-card urgent">
+    <div class="stat-number" id="stat-urgent">—</div>
+    <div class="stat-label">Urgent</div>
+  </div>
+  <div class="stat-card breached">
+    <div class="stat-number" id="stat-breached">—</div>
+    <div class="stat-label">SLA breached</div>
+  </div>
+</div>
+
+<!-- Main grid -->
+<div class="main">
+
+  <!-- Left: Ticket queue -->
+  <div class="panel">
+    <div class="panel-header">
+      Ticket queue
+      <button class="refresh-btn" onclick="loadDashboard()">↻ Refresh</button>
+    </div>
+    <div class="panel-body">
+      <table>
+        <thead>
+          <tr>
+            <th>Ticket ID</th>
+            <th>School</th>
+            <th>AI Category</th>
+            <th>Priority</th>
+            <th>SLA</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ticket-table-body">
+          <tr><td colspan="6" class="empty">Loading tickets...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Right: Logs -->
+  <div class="panel right-panel">
+    <div class="panel-header">Automation log</div>
+    <div class="panel-body" id="log-panel">
+      <div class="empty">Loading logs...</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ——— Helpers ———
+
+  function priorityBadge(p) {
+    const map = { Urgent: 'urgent', High: 'high', Medium: 'medium', Low: 'low' };
+    const cls = map[p] || 'low';
+    return `<span class="badge badge-${cls}">${p}</span>`;
+  }
+
+  function categoryBadge(c) {
+    const map = {
+      'Technical Issue': 'tech',
+      'Billing': 'billing',
+      'Results Inquiry': 'results',
+      'Candidate Registration': 'reg'
+    };
+    const cls = map[c] || 'low';
+    return `<span class="badge badge-${cls}">${c || '—'}</span>`;
+  }
+
+  function slaStatus(deadline) {
+    if (!deadline) return '<span class="sla-ok">—</span>';
+    const diff = new Date(deadline) - new Date();
+    const hrs = Math.round(diff / 3600000);
+    if (diff < 0) return `<span class="sla-breach">⚠ Breached ${Math.abs(hrs)}h ago</span>`;
+    if (hrs < 1) return `<span class="sla-warn">⚡ &lt;1h left</span>`;
+    return `<span class="sla-ok">✓ ${hrs}h left</span>`;
+  }
+
+  // ——— Load AI summary + suggested response for a ticket ———
+
+  async function showAIInsights(ticketId) {
+    const row = document.getElementById('ai-' + ticketId);
+    if (row.classList.contains('visible')) {
+      row.classList.remove('visible');
+      return;
+    }
+
+    row.innerHTML = '<div style="padding:10px;color:#6b778c;font-size:13px;">Loading AI insights...</div>';
+    row.classList.add('visible');
+
+    try {
+      // Fetch both summary and suggested response in parallel
+      const [summaryRes, responseRes] = await Promise.all([
+        fetch('/tickets/' + ticketId + '/summary'),
+        fetch('/tickets/' + ticketId + '/suggest-response')
+      ]);
+      const summaryData = await summaryRes.json();
+      const responseData = await responseRes.json();
+
+      row.innerHTML = `
+        <div class="ai-label">🤖 AI summary</div>
+        <div class="ai-summary">${summaryData.summary}</div>
+        <div class="ai-label">✉ Suggested response</div>
+        <div class="ai-response" id="response-text-${ticketId}">${responseData.suggested_response}</div>
+        <div class="ai-response-actions">
+          <button class="action-btn primary" onclick="copySuggestedResponse('${ticketId}')">Copy response</button>
+          <button class="action-btn" onclick="syncCRM('${ticketId}')">Sync to Salesforce</button>
+        </div>
+        <div id="crm-status-${ticketId}" style="margin-top:8px;font-size:12px;color:#00875a;display:none;"></div>
+      `;
+    } catch (err) {
+      row.innerHTML = '<div style="padding:10px;color:#de350b;">Error loading AI insights</div>';
+    }
+  }
+
+  function copySuggestedResponse(ticketId) {
+    const text = document.getElementById('response-text-' + ticketId).innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Response copied to clipboard!');
+    });
+  }
+
+  async function syncCRM(ticketId) {
+    const statusEl = document.getElementById('crm-status-' + ticketId);
+    statusEl.style.display = 'block';
+    statusEl.textContent = 'Syncing to Salesforce...';
+
+    try {
+      const res = await fetch('/crm/sync/' + ticketId, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        statusEl.textContent = '✓ Salesforce CRM updated at ' + new Date().toLocaleTimeString();
+      } else {
+        statusEl.style.color = '#de350b';
+        statusEl.textContent = 'Sync failed: ' + data.error;
+      }
+    } catch (err) {
+      statusEl.style.color = '#de350b';
+      statusEl.textContent = 'Network error during sync';
+    }
+  }
+
+  // ——— Load all dashboard data ———
+
+  async function loadDashboard() {
+    document.getElementById('last-refresh').textContent =
+      'Last refreshed: ' + new Date().toLocaleTimeString();
+
+    try {
+      // Stats
+      const statsRes = await fetch('/dashboard/stats');
+      const stats = await statsRes.json();
+      document.getElementById('stat-total').textContent = stats.total;
+      document.getElementById('stat-open').textContent = stats.open;
+      document.getElementById('stat-urgent').textContent = stats.urgent;
+      document.getElementById('stat-breached').textContent = stats.breached;
+
+      // Tickets
+      const ticketsRes = await fetch('/tickets/list');
+      const tickets = await ticketsRes.json();
+
+      const tbody = document.getElementById('ticket-table-body');
+      if (!tickets.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty">No tickets yet. Submit one from the portal!</td></tr>';
+      } else {
+        // Sort by most recent first
+        const sorted = [...tickets].sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
+        tbody.innerHTML = sorted.map(t => `
+          <tr>
+            <td><code style="font-size:12px">${t.ticket_id}</code></td>
+            <td style="font-size:13px">${t.school_name}</td>
+            <td>${categoryBadge(t.ai_category)}</td>
+            <td>${priorityBadge(t.final_priority)}</td>
+            <td>${slaStatus(t.sla_deadline)}</td>
+            <td>
+              <button class="action-btn primary" onclick="showAIInsights('${t.ticket_id}')">AI insights</button>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="6" class="ai-panel" id="ai-${t.ticket_id}"></td>
+          </tr>
+        `).join('');
+      }
+
+      // Logs
+      const logsRes = await fetch('/logs');
+      const logs = await logsRes.json();
+      const logPanel = document.getElementById('log-panel');
+      if (!logs.length) {
+        logPanel.innerHTML = '<div class="empty">No logs yet</div>';
+      } else {
+        const recent = [...logs].reverse().slice(0, 20);
+        logPanel.innerHTML = recent.map(l => `
+          <div class="log-item">
+            <div class="log-time">${new Date(l.timestamp).toLocaleTimeString()}</div>
+            <div class="log-action">${l.action.replace(/_/g, ' ')}</div>
+            <div class="log-detail">${l.ticket_id} → ${l.routed_to || l.ai_classification || ''}</div>
+          </div>
+        `).join('');
+      }
+
+    } catch (err) {
+      console.error('Dashboard load error:', err);
+    }
+  }
+
+  // Auto-refresh every 30 seconds
+  loadDashboard();
+  setInterval(loadDashboard, 30000);
+</script>
+
+</body>
+</html>

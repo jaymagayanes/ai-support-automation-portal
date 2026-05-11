@@ -1,0 +1,26 @@
+[
+  {
+    "timestamp": "2026-05-11T13:41:15.048Z",
+    "action": "ticket_created",
+    "ticket_id": "TKT-1778506875038",
+    "ai_classification": "Technical Issue",
+    "routed_to": "technical_support",
+    "sla_hours": 2
+  },
+  {
+    "timestamp": "2026-05-11T13:48:04.868Z",
+    "action": "ticket_created",
+    "ticket_id": "TKT-1778507284862",
+    "ai_classification": "General Inquiry",
+    "routed_to": "general_support",
+    "sla_hours": 24
+  },
+  {
+    "timestamp": "2026-05-11T13:52:20.039Z",
+    "action": "ticket_created",
+    "ticket_id": "TKT-1778507540034",
+    "ai_classification": "General Inquiry",
+    "routed_to": "general_support",
+    "sla_hours": 24
+  }
+]

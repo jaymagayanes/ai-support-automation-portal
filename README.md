@@ -48,3 +48,7 @@ User submits ticket → AI classifies → system routes → dashboard updates �
 ```bash
 npm install
 node index.js
+
+Open in local browser: 
+http://localhost:3000/portal.html
+http://localhost:3000/dashboard.html

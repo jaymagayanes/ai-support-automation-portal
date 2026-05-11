@@ -1,0 +1,50 @@
+[
+  {
+    "ticket_id": "TKT-1778506875038",
+    "school_name": "USA School",
+    "description": "I cannot login to Direct\n",
+    "ai_category": "Technical Issue",
+    "ai_priority": "High",
+    "ai_queue": "technical_support",
+    "final_priority": "High",
+    "sla_hours": 2,
+    "sla_deadline": "2026-05-11T15:41:15.039Z",
+    "status": "open",
+    "submitted_at": "2026-05-11T13:41:15.039Z",
+    "agent_assigned": null,
+    "summary": null,
+    "resolution": null
+  },
+  {
+    "ticket_id": "TKT-1778507284862",
+    "school_name": "International School of India",
+    "description": "I cannot submit entries",
+    "ai_category": "General Inquiry",
+    "ai_priority": "Low",
+    "ai_queue": "general_support",
+    "final_priority": "Low",
+    "sla_hours": 24,
+    "sla_deadline": "2026-05-12T13:48:04.862Z",
+    "status": "open",
+    "submitted_at": "2026-05-11T13:48:04.862Z",
+    "agent_assigned": null,
+    "summary": null,
+    "resolution": null
+  },
+  {
+    "ticket_id": "TKT-1778507540034",
+    "school_name": "Egypt British Council",
+    "description": "Do we know if we reached the programme fee waiver for this year?",
+    "ai_category": "General Inquiry",
+    "ai_priority": "Low",
+    "ai_queue": "general_support",
+    "final_priority": "Low",
+    "sla_hours": 24,
+    "sla_deadline": "2026-05-12T13:52:20.034Z",
+    "status": "open",
+    "submitted_at": "2026-05-11T13:52:20.034Z",
+    "agent_assigned": null,
+    "summary": null,
+    "resolution": null
+  }
+]

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Support Portal</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f5f7;
+      margin: 0;
+    }
+
+    /* Header */
+    .header {
+      background: #0052cc;
+      color: white;
+      padding: 14px 24px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .container {
+      padding: 40px;
+      text-align: center;
+    }
+
+    .open-btn {
+      padding: 12px 20px;
+      font-size: 14px;
+      background: #0052cc;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .open-btn:hover {
+      background: #0065ff;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background: white;
+      width: 420px;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .modal-header {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .modal-sub {
+      font-size: 13px;
+      color: #6b778c;
+      margin-bottom: 20px;
+    }
+
+    .close {
+      float: right;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border: 1px solid #dfe1e6;
+      border-radius: 4px;
+      font-size: 13px;
+      box-sizing: border-box; 
+    }
+
+    textarea {
+      height: 100px;
+      resize: none;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 10px;
+      background: #0052cc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .submit-btn:hover {
+      background: #0065ff;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #00875a;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Header -->
+<div class="header">
+  🎓 Cambridge School Support Portal
+</div>
+
+<div class="container">
+  <h2>Need assistance with your centre operations?</h2>
+  <p style="color:#6b778c;">Submit a support request and our team will route it automatically.</p>
+
+  <button class="open-btn" onclick="openModal()">Submit Ticket</button>
+</div>
+
+<!-- Modal -->
+<div id="ticketModal" class="modal">
+  <div class="modal-content">
+
+    <span class="close" onclick="closeModal()">&times;</span>
+
+    <div class="modal-header">
+      Submit Support Request
+    </div>
+
+    <div class="modal-sub">
+      For exam officers or school administrators. Please provide details of the issue.
+    </div>
+
+    <input id="school" placeholder="School / Centre name">
+
+    <textarea id="desc" placeholder="Describe the issue (e.g., unable to access exam portal, billing query, results concern)"></textarea>
+
+    <button class="submit-btn" onclick="createTicket()">Submit</button>
+
+    <div id="statusMsg" class="status"></div>
+
+  </div>
+</div>
+
+<script>
+
+function openModal() {
+  document.getElementById('ticketModal').style.display = 'block';
+}
+
+function closeModal() {
+  document.getElementById('ticketModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById('ticketModal');
+  if (event.target == modal) {
+    modal.style.display = 'none';
+  }
+};
+
+async function createTicket() {
+  const school = document.getElementById('school').value;
+  const desc = document.getElementById('desc').value;
+
+  const status = document.getElementById('statusMsg');
+  status.style.display = 'block';
+  status.style.color = '#6b778c';
+  status.innerText = 'Submitting ticket...';
+
+  try {
+    const res = await fetch('/tickets/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        school_name: school,
+        description: desc
+      })
+    });
+
+    const data = await res.json();
+
+    status.style.color = '#00875a';
+    status.innerText = `✅ Ticket created: ${data.ticket_id}
+AI Category: ${data.ai_insights.category}
+Priority: ${data.ai_insights.priority}`;
+
+    // Clear inputs
+    document.getElementById('school').value = '';
+    document.getElementById('desc').value = '';
+
+  } catch (err) {
+    status.style.color = '#de350b';
+    status.innerText = 'Error submitting ticket';
+  }
+}
+
+</script>
+
+</body>
+</html>
